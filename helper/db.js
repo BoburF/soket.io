@@ -1,4 +1,4 @@
-const url = 'mongodb+srv://Bobur:2vhYyYBf659w6eCm@cluster0.jnpjw6n.mongodb.net/Socket'
+const url = process.env.MONGO_URI
 const mongoose = require("mongoose");
 
 module.exports = async () => {
