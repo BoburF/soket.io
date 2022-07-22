@@ -1,19 +1,74 @@
-const socket = io()
-const h1 = document.querySelector('h1');
-const form = document.querySelector('form');
-const text = document.querySelector('#text');
+window.addEventListener('load',async function (e) {
+    const socket = io()
 
+    const msgField = document.querySelector('.chat__messages');
+    const chatForm = document.querySelector('#chat-form');
+    const msgInp = document.querySelector('.chat__message');
+    const roomName = document.querySelector('.chat__room_name');
+    const userList = document.querySelector('.chat_userss');
 
-form.addEventListener('submit', (e) => {
-    e.preventDefault()
-    const txt = text.value
-    const span = document.createElement('span')
-        span.innerHTML = txt
-        h1.append(span)
-    socket.emit('msg', txt)
-    socket.on('msg', (msg) => {
-        const span = document.createElement('span')
-        span.innerHTML = msg
-        h1.append(span)
+    const { username, room } = Qs.parse(location.search, {
+        ignoreQueryPrefix: true
     })
-})
+
+    const userOptions = {
+        name: username,
+        room: room
+    }
+
+    socket.emit('join', userOptions)
+
+    socket.on('room', (users) => {
+        userList.innerHTML = ''
+        users.forEach((user) => {
+            roomName.innerHTML = user.room
+            const li = document.createElement('li');
+            li.innerHTML = user.name
+            userList.append(li)
+        })
+    })
+
+    socket.on('bot', (data) => {
+        const date = new Date()
+        const p = document.createElement('p')
+        p.classList.add('notification')
+        p.innerHTML = `
+        <strong class="username_message">${data.user.name}</strong> ${data.msg} <span class="message_time">${date.toLocaleTimeString()}</span>
+        `
+        msgField.append(p)
+    })
+
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault()
+        let val = msgInp.value
+        socket.emit('message', val)
+        msgInp.value = ''
+    })
+
+    socket.on('message', (data) => {
+        msgSend(data)
+    })
+
+    socket.on('left', (data) => {
+        const date = new Date()
+        const p = document.createElement('p')
+        p.classList.add('notification')
+        p.innerHTML = `
+        <strong class="username_message">${data.user.name}</strong> ${data.msg} <span class="message_time">${date.toLocaleTimeString()}</span>
+        `
+        msgField.append(p)
+    })
+
+    function msgSend(data) {
+        const date = new Date()
+        const p = document.createElement('p')
+        p.classList.add('message')
+        p.innerHTML = `
+        <strong class="username_message">${data.user.name}</strong> ${data.msg} <span class="message_time">${date.toLocaleTimeString()}</span>
+        `
+        msgField.append(p)
+    }
+
+
+
+});
