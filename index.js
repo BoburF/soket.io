@@ -2,11 +2,11 @@ const express = require('express')
 const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
-require('./helper/db')()
 const User = require('./model/Users')
 const path = require('path')
 
 require('dotenv').config()
+require('./helper/db')()
 
 app.use(express.static(path.join(__dirname, 'public')))
 
@@ -64,7 +64,8 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect',async () => {
         const user = await leftUser(socket.id)
-        socket.broadcast.to(user.room).emit('left', { user, msg: 'Left the chat ' })
+        const users = await User.find()
+        socket.broadcast.to(user.room).emit('left', { user,users, msg: 'Left the chat ' })
     })
 
 })

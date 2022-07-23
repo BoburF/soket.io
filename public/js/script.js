@@ -57,6 +57,13 @@ window.addEventListener('load',async function (e) {
         <strong class="username_message">${data.user.name}</strong> ${data.msg} <span class="message_time">${date.toLocaleTimeString()}</span>
         `
         msgField.append(p)
+        userList.innerHTML = ''
+        data.users.forEach((user) => {
+            roomName.innerHTML = user.room
+            const li = document.createElement('li');
+            li.innerHTML = user.name
+            userList.append(li)
+        })
     })
 
     function msgSend(data) {
